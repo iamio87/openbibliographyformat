@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<grammar xmlns="http://relaxng.org/ns/structure/1.0"
+
+	datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes"
+
+	xmlns:office = "urn:oasis:names:tc:opendocument:mlns:office:1.0"
+	xmlns:odb = "odf-bibliography.com:1.0"
+>
+
+  <start>
+    <choice>
+      <ref name="office-document"/>
+      <ref name="office-bibliography"/>
+    </choice>
+  </start>
+  
+  <define name="office-bibliography">
+    <element name="odb:resources">
+      <ref name="bibliography-content"/>
+    </element>
+  </define>
+  
+  <define name="bibliography-content">
+    <element name="odb:meta"><!-- required first child element -->
+      <ref name="bibliography-meta"/>
+    </element>
+    <interleave>
+      <optional>
+	<element name="odb:sources">
+	  <ref name="sources-content"/>
+	</element>
+      </optional>
+      <optional>
+	<element name="odb:credits">
+	  <ref name="credits-content"/>
+	</element>
+      </optional>
+      <optional>
+	<element name="odb:exhibits">
+	  <ref name="exhibits-content"/>
+	</element>
+      </optional>
+<!--      <optional>
+	<element name="odb:relationships">
+	  <ref name="relationships-content"/>
+	</element>
+      </optional> -->
+<!--      <optional>
+	<element name="odb:entitites">
+	  <ref name="entities-content"/>
+	</element>
+      </optional>   -->
+    </interleave>
+  </define>
+
+  <define name="bibliography-meta">
+    <interleave>
+      <element name="odb:style">
+	<interleave>
+	  <element name="odb:style-file">
+	    <data type="anyURI"/>
+	  </element>
+	  <optional>
+	    <element name="odb:style-type">
+	      <choice>
+		<value>csl</value>
+	      </choice>
+	    </element>
+	  </optional>
+	  <optional>
+	    <element name="odb:style-name">
+	      <data type="string"/>
+	    </element>
+	  </optional>
+	</interleave>
+      </element>
+    </interleave>
+  </define>
+
+  <define name="sources-content">
+    <zeroOrMore>
+      <element name="odb:source">
+	<ref name="source-content"/>
+      </element>
+    </zeroOrMore>
+  </define>
+
+  <define name="source-content">
+    <ref name="item-content"/>
+  </define>
+
+  <define name="credits-content">
+    <zeroOrMore>
+      <element name="odb:credit">
+	<ref name="credit-content"/>
+      </element>
+    </zeroOrMore>
+  </define>
+
+  <define name="credit-content">
+    <ref name="item-content"/>
+  </define>
+
+  <define name="exhibits-content">
+    <zeroOrMore>
+      <element name="odb:exhibit">
+	<ref name="exhibit-content"/>
+      </element>
+    </zeroOrMore>
+  </define>
+
+  <define name="exhibit-content">
+    <ref name="item-content"/>
+  </define>
+  
+  <define name="item-content">
+    <interleave>
+      <element name="odb:id"><!-- id field is required -->
+	<data type="ID"/>
+      </element>
+      <optional>
+	<element name="odb:type"><!-- type field is required for CSL processing -->
+	  <data type="string"/>
+	</element>
+      </optional>
+      <zeroOrMore><!-- regular text fields -->
+	<element>
+	  <anyName/>
+	  <data type="string"/>
+	</element>
+      </zeroOrMore>
+      <zeroOrMore><!-- name fields -->
+	<choice>
+	  <element>
+	    <anyName/>
+	    <optional>
+	      <element name="odb:family">
+		<data type="string"/>
+	      </element>
+	    </optional>
+	    <optional>
+	      <element name="odb:given">
+		<data type="string"/>
+	      </element>
+	    </optional>
+	    <optional>
+	      <element name="odb:suffix">
+		<data type="string"/>
+	      </element>
+	    </optional>
+	    <optional>
+	      <element name="odb:non-dropping-particle">
+		<data type="string"/>
+	      </element>
+	    </optional>
+	    <optional>
+	      <element name="odb:dropping-particle">
+		<data type="string"/>
+	      </element>
+	    </optional>
+	  </element>
+<!--	  <ref name="relationship-element"/> -->
+	</choice>
+      </zeroOrMore>
+      <zeroOrMore><!-- date fields -->
+	<element>
+	  <anyName/>
+	  <oneOrMore>
+	    <element name="odb:date">
+	      <choice>
+		<data type="date"/><!-- data in raw format -->
+		<group> <!-- data in date-part format -->
+		  <optional>
+		    <element name="odb:year">
+		      <data type="string"/>
+		    </element>
+		  </optional>
+		  <optional>
+		    <element name="odb:month">
+		      <data type="string"/>
+		    </element>
+		  </optional>
+		  <optional>
+		    <element name="odb:day">
+		      <data type="string"/>
+		    </element>
+		  </optional>
+		  <optional>
+		    <element name="odb:calendar">
+		      <data type="string"/>
+		    </element>
+		  </optional>
+		  <optional>
+		    <element name="odb:era">
+		      <data type="string"/>
+		    </element>
+		  </optional>
+		</group>
+	      </choice>
+	    </element>
+	  </oneOrMore>
+	</element>
+      </zeroOrMore>
+    </interleave>
+  </define>
+  
+</grammar>
