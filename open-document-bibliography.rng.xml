@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <grammar xmlns="http://relaxng.org/ns/structure/1.0"
-
 	datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes"
 
 	xmlns:office = "urn:oasis:names:tc:opendocument:mlns:office:1.0"
 	xmlns:odb = "odf-bibliography.com:1.0"
+	xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0"
 >
 
   <start>
@@ -56,21 +56,31 @@
 
   <define name="bibliography-meta">
     <interleave>
-      <element name="odb:style">
+      <element name="odb:source-style">
 	<interleave>
-	  <element name="odb:style-file">
-	    <data type="anyURI"/>
-	  </element>
+	  <choice>
+	    <element name="odb:style-file"><!-- relative path to the csl.xml file that will style the data -->
+	      <data type="anyURI"/>
+	    </element>
+	    <group><!-- If there is no csl file, then this should contain the meta data about the research field and citation system. -->
+	      <element name="odb:citation-system"><!-- The csl.xml file will have meta-data-->
+		<data type="string"/>
+	      </element>
+	      <element name="odb:research-field">
+		<data type="string"/>
+	      </element>
+	      <optional>
+		<element name="odb:style-name">
+		  <data type="string"/>
+		</element>
+	      </optional>
+	    </group>
+	  </choice>
 	  <optional>
 	    <element name="odb:style-type">
 	      <choice>
 		<value>csl</value>
 	      </choice>
-	    </element>
-	  </optional>
-	  <optional>
-	    <element name="odb:style-name">
-	      <data type="string"/>
 	    </element>
 	  </optional>
 	</interleave>
@@ -202,7 +212,109 @@
 	  </oneOrMore>
 	</element>
       </zeroOrMore>
+      <zeroOrMore><!-- corresponds to my custom CSL <containers> element -->
+	<element>
+	  <anyName/>
+	  <zeroOrMore>
+	    <element>
+	      <anyName/>
+	      <zeroOrMore>
+		<element>
+		  <anyName/>
+		  <data type="string"/>
+		</element>
+	      </zeroOrMore>
+	    </element>
+	  </zeroOrMore>
+	</element>
+      </zeroOrMore>
     </interleave>
+  </define>
+
+
+  <!-- this piggybacks on main rng -->
+  <define name="paragraph-content">
+    <choice>
+      <element name="text:sources-cluster"><!-- child elements reference <source> elements in resources.xml -->
+	<ref name="cluster-content"/>
+      </element>
+      <element name="text:credits-cluster"><!-- child elements reference <source> elements in resources.xml -->
+	<ref name="cluster-content"/>
+      </element>
+      <element name="text:exhibits-cluster"><!-- child elements reference <exhibit> elements in resources.xml -->
+	<ref name="cluster-content"/>
+      </element>
+    </choice>
+  </define>
+
+  <define name="cluster-content">
+    <interleave>
+      <optional>
+	<attribute name="text:cluster-id">
+	  <data type="ID"/>
+	</attribute>
+      </optional>
+      <optional>
+	<attribute name="text:note-number">
+	  <data type="string"/>
+	</attribute>
+      </optional>
+    </interleave>
+    <mixed>
+      <ref name="in-text-reference"/>
+    </mixed>
+  </define>
+
+  <define name="in-text-reference">
+    <oneOrMore>
+      <element name="odb:ref">
+	<element name="odb:ref-id"><!-- corresponds to ID of resource -->
+	  <data type="ID"/>
+	</element>
+	<optional>
+	  <element name="odb:prefix">
+	    <data type="string"/>
+	  </element>
+	</optional>
+	<optional>
+	  <element name="odb:suffix">
+	    <data type="string"/>
+	  </element>
+	</optional>
+	<optional>
+	  <element name="odb:readable-cite"><!-- this is what is displayed in printed document. -->
+	    <mixed>
+	      <zeroOrMore>
+		<ref name="text-span"/>
+	      </zeroOrMore>
+	    </mixed>
+	  </element>
+	</optional>
+	<optional>
+	  <element name="odb:locator">
+	    <data type="string"/>
+	  </element>
+	</optional>
+      </element>
+    </oneOrMore>
+  </define>
+
+  <define name="text-span">
+    <element name="text:span">
+      <optional>
+	<attribute name="text:style-name">
+	  <ref name="styleNameRef"/>
+	</attribute>
+      </optional>
+      <optional>
+	<attribute name="text:class-names">
+	  <ref name="styleNameRefs"/>
+	</attribute>
+      </optional>
+      <zeroOrMore>
+	<ref name="paragraph-content-or-hyperlink"/>
+      </zeroOrMore>
+    </element>
   </define>
   
 </grammar>
